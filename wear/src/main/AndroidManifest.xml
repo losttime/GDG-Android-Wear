@@ -18,6 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- TODO: Create and Register a WearableListenerService -->
     </application>
 
 </manifest>
