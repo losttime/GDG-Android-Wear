@@ -4,7 +4,7 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
 
-	<!-- Enable vibrate permission -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:allowBackup="true"

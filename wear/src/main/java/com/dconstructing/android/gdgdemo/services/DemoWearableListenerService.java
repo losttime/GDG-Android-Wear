@@ -29,4 +29,6 @@ public class DemoWearableListenerService extends WearableListenerService {
 		notificationManager.notify(1, notification);
 	}
 
+	// TODO: Implement the onPeerConnected method
+
 }
