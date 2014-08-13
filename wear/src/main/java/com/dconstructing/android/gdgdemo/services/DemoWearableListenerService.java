@@ -2,7 +2,9 @@ package com.dconstructing.android.gdgdemo.services;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import com.dconstructing.android.gdgdemo.R;
@@ -34,7 +36,12 @@ public class DemoWearableListenerService extends WearableListenerService {
 	public void onPeerConnected(Node peer) {
 		super.onPeerConnected(peer);
 
-		// TODO: Add an action to this notification
+		Intent actionIntent = new Intent(this, MessageService.class);
+		PendingIntent actionPendingIntent = PendingIntent.getService(this, 0, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		Notification.Action action = new Notification.Action.Builder(R.drawable.ic_full_cancel,
+				"Alert", actionPendingIntent)
+				.build();
 
 		Notification notification = new Notification.Builder(this)
 				.setSmallIcon(R.drawable.ic_launcher)
@@ -42,6 +49,7 @@ public class DemoWearableListenerService extends WearableListenerService {
 				.setContentText("We're back ;)")
 				.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 				.setDefaults(NotificationCompat.DEFAULT_ALL)
+				.extend(new Notification.WearableExtender().addAction(action))
 				.build();
 
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
