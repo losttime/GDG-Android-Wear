@@ -1,5 +1,6 @@
 package com.dconstructing.android.gdgdemo.services;
 
+import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
 /**
@@ -7,6 +8,15 @@ import com.google.android.gms.wearable.WearableListenerService;
  */
 public class DemoWearableListenerService extends WearableListenerService {
 
-	// TODO: implement onMessageReceived method
+	private static final String SOUND_ALERT_PATH = "/alert/start";
+
+	@Override
+	public void onMessageReceived(MessageEvent messageEvent) {
+		super.onMessageReceived(messageEvent);
+
+		if (messageEvent.getPath().equals(SOUND_ALERT_PATH)) {
+			// Sound the alert
+		}
+	}
 
 }
