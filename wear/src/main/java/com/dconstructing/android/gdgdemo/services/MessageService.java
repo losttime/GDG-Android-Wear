@@ -10,7 +10,13 @@ import android.os.Looper;
 import android.os.Message;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by dcox on 8/12/14.
@@ -18,11 +24,16 @@ import com.google.android.gms.wearable.Wearable;
 public class MessageService extends Service implements GoogleApiClient.ConnectionCallbacks {
 
 	private static final int MESSAGE_GOOGLE_PLAY_SERVICES = 1;
+	private static final int MESSAGE_FIND_HOST = 2;
+	private static final int MESSAGE_INTENT = 3;
+
+	private static final String SOUND_ALERT_PATH = "/alert/start";
+
+	private LinkedList<Intent> intentQueue = new LinkedList<Intent>();
 
 	private GoogleApiClient googleApiClient;
 	private volatile ServiceHandler serviceHandler;
-
-	// TODO: Send a message to the handset
+	private Node host;
 
 	@Override
 	public void onCreate() {
@@ -39,13 +50,55 @@ public class MessageService extends Service implements GoogleApiClient.Connectio
 		Message GPSMessage = serviceHandler.obtainMessage();
 		GPSMessage.what = MESSAGE_GOOGLE_PLAY_SERVICES;
 		serviceHandler.sendMessage(GPSMessage);
+
+		Message hostmsg = serviceHandler.obtainMessage();
+		hostmsg.what = MESSAGE_FIND_HOST;
+		serviceHandler.sendMessage(hostmsg);
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		// TODO: Send a message to the handset
+		Message msg = serviceHandler.obtainMessage();
+		msg.what = MESSAGE_INTENT;
+		msg.arg1 = startId;
+		serviceHandler.sendMessage(msg);
 
 		return START_STICKY;
+	}
+
+	private void findHostNode() {
+		NodeApi.GetConnectedNodesResult nodesResult = Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
+		List<Node> nodes = nodesResult.getNodes();
+		if (nodes.size() > 0) {
+			host = nodes.get(0);
+			processIntents();
+		} else {
+			stopSelf();
+		}
+	}
+
+	private void onHandleIntent(Intent intent) {
+		if (googleApiClient.isConnected() && host != null) {
+			processIntent(intent);
+		} else {
+			intentQueue.add(intent);
+		}
+	}
+
+	private void processIntents() {
+		if (googleApiClient.isConnected() && host != null) {
+			while(intentQueue.size() > 0) {
+				processIntent(intentQueue.poll());
+			}
+		}
+	}
+
+	private void processIntent(Intent intent) {
+		MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(googleApiClient, host.getId(), SOUND_ALERT_PATH, null).await();
+
+		if (intentQueue.size() == 0) {
+			stopSelf();
+		}
 	}
 
 	@Override
@@ -55,7 +108,7 @@ public class MessageService extends Service implements GoogleApiClient.Connectio
 
 	@Override
 	public void onConnected(Bundle bundle) {
-
+		processIntents();
 	}
 
 	@Override
@@ -74,6 +127,11 @@ public class MessageService extends Service implements GoogleApiClient.Connectio
 				case MESSAGE_GOOGLE_PLAY_SERVICES:
 					googleApiClient.connect();
 					break;
+				case MESSAGE_FIND_HOST:
+					findHostNode();
+					break;
+				case MESSAGE_INTENT:
+					onHandleIntent((Intent) msg.obj);
 				default:
 					// no-op
 			}
