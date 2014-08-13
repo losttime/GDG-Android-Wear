@@ -20,6 +20,13 @@ import java.util.List;
 
 /**
  * Created by dcox on 8/12/14.
+ *
+ * In order to send a message to a different device (watch->phone, phone->watch),
+ * you'll need to connect to Google Play Services. Connecting to Google Play Services is an
+ * asynchronous process. Don't have your message-sending service extend from IntentService, because
+ * IntentService shuts itself down as soon as the `onHandleIntent` method is complete. You'll still
+ * be waiting for the connection to Google Play Services when your service cancels itself, so your
+ * message will never get sent.
  */
 public class MessageService extends Service implements GoogleApiClient.ConnectionCallbacks {
 

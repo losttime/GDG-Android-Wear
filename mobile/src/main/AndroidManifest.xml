@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dconstructing.android.gdgdemo" >
 
+	<!--
+	Your mobile app doesn't need this permission, but your wear app does.
+	The user needs to accept this permission for your app, or else there will be installation issues.
+	The Google Play Store doesn't have any way of asking users to accept permission for wear apps
+		because they're embedded inside the mobile app.
+	Therefore, your mobile app has to request this permission, so your wear app can be installed.
+	-->
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application

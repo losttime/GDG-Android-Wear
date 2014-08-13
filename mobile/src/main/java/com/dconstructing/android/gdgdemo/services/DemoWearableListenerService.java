@@ -8,6 +8,8 @@ import com.google.android.gms.wearable.WearableListenerService;
  */
 public class DemoWearableListenerService extends WearableListenerService {
 
+	// Because the mobile app and wear app exist separate from each other,
+	// they can't share resources, like this constant. DRY does not apply :(
 	private static final String SOUND_ALERT_PATH = "/alert/start";
 
 	@Override
